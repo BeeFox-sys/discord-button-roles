@@ -1,0 +1,13 @@
+{
+	"name": "discord-button-roles",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"discord.js": "^13.0.0-dev.fbcbb29884a35308a7af2169f5f9ae5658c458e8",
+		"dotenv": "^10.0.0"
+	}
+}
