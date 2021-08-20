@@ -4,7 +4,7 @@ const {MessageRoles} = require("../schemas/roles");
 module.exports.commandData = {
     "name": "roles",
     "description": "Manages bot roles",
-    "type": "MESSAGE",
+    "type": "CHAT_INPUT",
     "options": [
         {
             "name": "add",

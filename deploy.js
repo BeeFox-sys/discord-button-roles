@@ -17,7 +17,12 @@ module.exports = async function deploy (client, guild = null) {
 
             const command = commands[name];
 
-            data.push(command.commandData);
+            if (command.commandData) {
+
+                data.push(command.commandData);
+
+            }
+
         
         }
     

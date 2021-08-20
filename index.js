@@ -11,7 +11,7 @@ const client = new Client({
 });
 
 // Deploy Commands
-client.on("message", async (message) => {
+client.on("messageCreate", async (message) => {
 
     if (!client.application?.owner) {
 
