@@ -1,4 +1,4 @@
-const {MessageActionRow, CommandInteraction} = require("discord.js");
+const {MessageActionRow, CommandInteraction, MessageButton} = require("discord.js");
 const {MessageRoles} = require("../schemas/roles");
 
 module.exports.commandData = {
@@ -232,13 +232,19 @@ async function add (interaction) {
                 const {label, emoji, style, buttonID} = button;
 
 
-                components[row].addComponents({
+                const newButton = new MessageButton({
                     label,
-                    "emoji": {"name": emoji},
                     style,
-                    "custom_id": buttonID,
-                    "type": 2
+                    "custom_id": buttonID
                 });
+
+                if (emoji) {
+
+                    newButton.setEmoji(emoji);
+
+                }
+
+                components[row].addComponents(newButton);
             
             }
         
