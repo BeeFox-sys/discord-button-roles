@@ -250,7 +250,7 @@ async function add (interaction) {
         
         }
 
-        console.log(components);
+        // console.log(components);
 
         await message.edit({
             "content": message.content,

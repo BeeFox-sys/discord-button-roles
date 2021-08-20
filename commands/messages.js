@@ -146,7 +146,8 @@ async function create (interaction) {
         "channelID": message.channel.id,
         "messageID": message.id,
         "replace": false,
-        "buttons": []
+        "buttons": [],
+        "mode": 0
     }).save((err) => {
 
         // TODO: error handling
