@@ -18,7 +18,7 @@ rules:
   block-spacing: error
   brace-style: error
   callback-return: error
-  capitalized-comments: error
+  capitalized-comments: off
   class-methods-use-this: error
   comma-dangle: error
   comma-spacing: error
@@ -68,9 +68,7 @@ rules:
   lines-between-class-members: error
   max-classes-per-file: error
   max-depth: error
-  max-len: 
-    - warn
-    - 100
+  max-len: off
   max-nested-callbacks: error
   max-params: error
   max-statements-per-line: error
@@ -171,7 +169,7 @@ rules:
   no-useless-return: error
   no-var: error
   no-void: error
-  no-warning-comments: error
+  no-warning-comments: warn
   no-whitespace-before-property: error
   nonblock-statement-body-position: error
   object-curly-newline: error

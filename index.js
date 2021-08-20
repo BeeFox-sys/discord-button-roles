@@ -21,18 +21,18 @@ client.on("message", async (message) => {
 
     if (client.application?.owner.id === message.author.id) {
 
-        if (message.content === "emoji!deploy global") {
+        if (message.content === "roles!deploy global") {
 
             await deploy(client);
 
-            message.channel.send("Deployed Globaly!", {"messageReference": message});
+            message.channel.send("Deployed Globaly!", {"messageReference": message.id});
 
         
-        } else if (message.guild && message.content === "emoji!deploy") {
+        } else if (message.guild && message.content === "roles!deploy") {
 
             await deploy(client, message.guild.id);
 
-            message.channel.send("Deployed!", {"messageReference": message});
+            message.channel.send("Deployed!", {"messageReference": message.id});
         
         }
         
@@ -43,7 +43,16 @@ client.on("message", async (message) => {
 
 const commands = require("./commands");
 
+const assignRole = require("./assignRole");
+
+
 client.on("interaction", (interaction) => {
+
+    if (!interaction.guild) {
+
+        interaction.reply("No can do! I am a guild only bot!");
+    
+    }
 
     if (interaction.isCommand()) {
 
@@ -56,10 +65,14 @@ client.on("interaction", (interaction) => {
             buttonName
         ] = interaction.customID.split("_");
 
-        if (commands[commandName].buttons[buttonName]) {
+        if (commands[commandName]?.buttons[buttonName]) {
 
             commands[commandName].buttons[buttonName](interaction);
 
+        } else {
+
+            assignRole(interaction);
+        
         }
     
     } else {
@@ -73,7 +86,22 @@ client.on("interaction", (interaction) => {
 
 client.on("ready", () => {
 
-    console.log("ready");
+    console.log("bot connected  ");
 
 });
-client.login(process.env.TOKEN);
+
+const mongoose = require("mongoose");
+
+mongoose.connect(process.env.DB_URL, {"useNewUrlParser": true,
+    "useUnifiedTopology": true});
+const db = mongoose.connection;
+
+db.on("error", console.error.bind(console, "connection error:"));
+db.once("open", () => {
+
+    console.log("db connected");
+    client.login(process.env.TOKEN);
+
+});
+
+
