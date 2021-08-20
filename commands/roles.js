@@ -35,19 +35,19 @@ module.exports.commandData = {
                     "choices": [
                         {
                             "name": "Blurple",
-                            "value": "PRIMARY"
+                            "value": 1
                         },
                         {
                             "name": "Grey",
-                            "value": "SECONDARY"
+                            "value": 2
                         },
                         {
                             "name": "Red",
-                            "value": "DANGER"
+                            "value": 4
                         },
                         {
                             "name": "Green",
-                            "value": "SUCCESS"
+                            "value": 3
                         }
                     ]
                 },
@@ -105,20 +105,16 @@ module.exports.command = function command (interaction) {
     
     }
 
-    if (interaction.options.has("add")) {
+    switch (interaction.options.getSubcommand()) {
 
-        add(interaction);
-
-    }
-    if (interaction.options.has("remove")) {
-
-        remove(interaction);
-
-    }
-    if (interaction.options.has("cleanup")) {
-
-        cleanup(interaction);
-    
+    case "add": add(interaction);
+        break;
+    case "remove": remove(interaction);
+        break;
+    case "cleanup": cleanup(interaction);
+        break;
+    default: break;
+        
     }
 
 };
@@ -129,9 +125,7 @@ module.exports.command = function command (interaction) {
  */
 async function add (interaction) {
 
-    const {options} = interaction.options.get("add");
-
-    const id = options.get("id").value;
+    const id = interaction.options.get("id").value;
     const messageEntry = await MessageRoles.findOne({"messageID": id});
 
     if (!messageEntry || messageEntry.guildID !== interaction.guild.id) {
@@ -145,7 +139,7 @@ async function add (interaction) {
     
     }
 
-    if (!options.get("label")?.value && !options.get("emoji")?.value) {
+    if (!interaction.options.get("label")?.value && !interaction.options.get("emoji")?.value) {
 
         interaction.reply({
             "epherical": true,
@@ -156,7 +150,7 @@ async function add (interaction) {
     
     }
 
-    if (options.get("label")?.value && options.get("label").value?.length > 80) {
+    if (interaction.options.get("label")?.value && interaction.options.get("label").value?.length > 80) {
 
         interaction.reply({
             "epherical": true,
@@ -170,7 +164,7 @@ async function add (interaction) {
     // eslint-disable-next-line require-unicode-regexp
     const emojiRegex = /(?:\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]|<a?:.+?:\d+>)/i;
 
-    if (options.get("emoji")?.value && !emojiRegex.test(options.get("emoji").value)) {
+    if (interaction.options.get("emoji")?.value && !emojiRegex.test(interaction.options.get("emoji").value)) {
 
         interaction.reply({
             "epherical": true,
@@ -192,7 +186,7 @@ async function add (interaction) {
     
     }
 
-    if (messageEntry.buttons.filter((elem) => elem.roleID === options.get("role").value).length) {
+    if (messageEntry.buttons.filter((elem) => elem.roleID === interaction.options.get("role").value).length) {
 
         interaction.reply({
             "epherical": true,
@@ -209,11 +203,11 @@ async function add (interaction) {
 
     // Create New Button
     messageEntry.buttons.push({
-        "roleID": options.get("role").value,
-        "buttonID": `${message.id}-${options.get("role").value}`, // messageid-roleid
-        "label": options.get("label")?.value ?? null,
-        "emoji": options.get("emoji")?.value.match(emojiRegex)[0] ?? null,
-        "style": options.get("style")?.value ?? "SECONDARY"
+        "roleID": interaction.options.get("role").value,
+        "buttonID": `${message.id}-${interaction.options.get("role").value}`, // messageid-roleid
+        "label": interaction.options.get("label")?.value ?? null,
+        "emoji": interaction.options.get("emoji")?.value.match(emojiRegex)[0] ?? null,
+        "style": interaction.options.get("style")?.value ?? 2
     });
 
     messageEntry.save().then(async (newEntry) => {
@@ -235,14 +229,14 @@ async function add (interaction) {
                 
                 }
 
-                const {label, emoji, style, "buttonID": customID} = button;
+                const {label, emoji, style, buttonID} = button;
 
 
                 components[row].addComponents({
                     label,
-                    emoji,
+                    "emoji": {"name": emoji},
                     style,
-                    customID,
+                    "custom_id": buttonID,
                     "type": 2
                 });
             
@@ -250,8 +244,7 @@ async function add (interaction) {
         
         }
 
-        // spacer
-    
+        console.log(components);
 
         await message.edit({
             "content": message.content,
@@ -265,9 +258,9 @@ async function add (interaction) {
                     "type": "ACTION_ROW",
                     "components": [
                         {
-                            "type": "BUTTON",
+                            "type": 2,
                             "label": "Jump!",
-                            "style": "LINK",
+                            "style": 5,
                             "url": message.url
                         }
                     ]
@@ -285,9 +278,8 @@ async function add (interaction) {
  */
 async function remove (interaction) {
 
-    const {options} = interaction.options.get("remove");
 
-    const id = options.get("id").value;
+    const id = interaction.options.get("id").value;
     const messageEntry = await MessageRoles.findOne({"messageID": id});
 
     if (!messageEntry || messageEntry.guildID !== interaction.guild.id) {
@@ -301,7 +293,7 @@ async function remove (interaction) {
     
     }
 
-    if (!messageEntry.buttons.filter((elem) => elem.roleID === options.get("role").value).length) {
+    if (!messageEntry.buttons.filter((elem) => elem.roleID === interaction.options.get("role").value).length) {
 
         interaction.reply({
             "epherical": true,
@@ -313,7 +305,7 @@ async function remove (interaction) {
     }
     
     
-    const buttonIndex = messageEntry.buttons.indexOf((elem) => elem.roleID === options.get("role").value);
+    const buttonIndex = messageEntry.buttons.indexOf((elem) => elem.roleID === interaction.options.get("role").value);
 
     messageEntry.buttons.splice(buttonIndex, 1);
 
@@ -342,14 +334,14 @@ async function remove (interaction) {
                 
                 }
 
-                const {label, emoji, style, "buttonID": customID} = button;
+                const {label, emoji, style, "buttonID": custom_id} = button;
 
 
                 components[row].addComponents({
                     label,
                     emoji,
                     style,
-                    customID,
+                    custom_id,
                     "type": 2
                 });
             
@@ -372,9 +364,9 @@ async function remove (interaction) {
                     "type": "ACTION_ROW",
                     "components": [
                         {
-                            "type": "BUTTON",
+                            "type": 2,
                             "label": "Jump!",
-                            "style": "LINK",
+                            "style": 5,
                             "url": message.url
                         }
                     ]
@@ -392,9 +384,7 @@ async function remove (interaction) {
  */
 async function cleanup (interaction) {
 
-    const {options} = interaction.options.get("cleanup");
-
-    const id = options.get("id").value;
+    const id = interaction.options.get("id").value;
     const messageEntry = await MessageRoles.findOne({"messageID": id});
 
     if (!messageEntry || messageEntry.guildID !== interaction.guild.id) {
@@ -455,14 +445,14 @@ async function cleanup (interaction) {
                 
             }
 
-            const {label, emoji, style, "buttonID": customID} = button;
+            const {label, emoji, style, "buttonID": custom_id} = button;
 
 
             components[row].addComponents({
                 label,
                 emoji,
                 style,
-                customID,
+                custom_id,
                 "type": 2
             });
             
@@ -485,9 +475,9 @@ async function cleanup (interaction) {
                 "type": "ACTION_ROW",
                 "components": [
                     {
-                        "type": "BUTTON",
+                        "type": 2,
                         "label": "Jump!",
-                        "style": "LINK",
+                        "style": 5,
                         "url": message.url
                     }
                 ]

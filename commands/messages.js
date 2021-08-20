@@ -1,4 +1,4 @@
-const {MessageActionRow, Interaction} = require("discord.js");
+const {MessageActionRow, Interaction, CommandInteraction} = require("discord.js");
 const {MessageRoles} = require("../schemas/roles");
 
 module.exports.commandData = {
@@ -83,6 +83,10 @@ module.exports.commandData = {
     ]
 };
 
+/**
+ *
+ * @param {CommandInteraction} interaction
+ */
 module.exports.command = function command (interaction) {
 
     if (!interaction.member.permissions.has("MANAGE_GUILD")) {
@@ -96,20 +100,16 @@ module.exports.command = function command (interaction) {
     
     }
 
-    if (interaction.options.has("create")) {
+    switch (interaction.options.getSubcommand()) {
 
-        create(interaction);
-
-    }
-    if (interaction.options.has("edit")) {
-
-        edit(interaction);
-
-    }
-    if (interaction.options.has("mode")) {
-
-        mode(interaction);
-
+    case "create": create(interaction);
+        break;
+    case "edit": edit(interaction);
+        break;
+    case "mode": mode(interaction);
+        break;
+    default: break;
+    
     }
 
 };
@@ -120,24 +120,22 @@ module.exports.command = function command (interaction) {
  */
 async function create (interaction) {
 
-    const {options} = interaction.options.get("create");
-
     const rowOne = new MessageActionRow()
         .addComponents([
             {
                 "label": "How to add roles",
                 "type": 2,
                 "emoji": "❓",
-                "style": "SECONDARY",
-                "customID": `${module.exports.commandData.name}_addRoles`
+                "style": 2,
+                "custom_id": `${module.exports.commandData.name}_addRoles`
             }
         ]);
 
     interaction.reply("Creating Message...");
 
-    console.log(options.get("channel"));
-    const message = await options.get("channel").channel.send({
-        "content": options.get("content")?.value ?? "** **",
+    console.log(interaction.options.get("channel"));
+    const message = await interaction.options.get("channel").channel.send({
+        "content": interaction.options.get("content")?.value ?? "** **",
         "components": [rowOne]
     });
 
@@ -164,9 +162,9 @@ async function create (interaction) {
                     "type": "ACTION_ROW",
                     "components": [
                         {
-                            "type": "BUTTON",
+                            "type": 2,
                             "label": "Jump!",
-                            "style": "LINK",
+                            "style": 5,
                             "url": message.url
                         }
                     ]
@@ -184,9 +182,7 @@ async function create (interaction) {
  */
 async function edit (interaction) {
 
-    const {options} = interaction.options.get("edit");
-
-    const id = options.get("id").value;
+    const id = interaction.options.get("id").value;
     const messageEntry = await MessageRoles.findOne({"messageID": id});
 
     if (!messageEntry || messageEntry.guildID !== interaction.guild.id) {
@@ -203,7 +199,7 @@ async function edit (interaction) {
     const channel = await interaction.guild.channels.fetch(messageEntry.channelID);
     const message = await channel.messages.fetch(messageEntry.messageID);
 
-    await message.edit(options.get("content").value);
+    await message.edit(interaction.options.get("content").value);
 
     interaction.reply({
         "content": "Edited Message!",
@@ -212,9 +208,9 @@ async function edit (interaction) {
                 "type": "ACTION_ROW",
                 "components": [
                     {
-                        "type": "BUTTON",
+                        "type": 2,
                         "label": "Jump!",
-                        "style": "LINK",
+                        "style": 5,
                         "url": message.url
                     }
                 ]
@@ -254,9 +250,7 @@ const messageModeTypes = {
  */
 async function mode (interaction) {
 
-    const {options} = interaction.options.get("mode");
-
-    const id = options.get("id").value;
+    const id = interaction.options.get("id").value;
     const messageEntry = await MessageRoles.findOne({"messageID": id});
 
     if (!messageEntry || messageEntry.guildID !== interaction.guild.id) {
@@ -270,7 +264,7 @@ async function mode (interaction) {
     
     }
 
-    const messageMode = options.get("mode").value;
+    const messageMode = interaction.options.get("mode").value;
 
     messageEntry.mode = messageMode;
     messageEntry.save();

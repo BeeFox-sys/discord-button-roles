@@ -12,7 +12,7 @@ const messageRoles = new Schema({
             "buttonID": String, // messageid-roleid
             "label": String,
             "emoji": String,
-            "style": String
+            "style": Number
         }
     ]
 });

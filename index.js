@@ -46,7 +46,7 @@ const commands = require("./commands");
 const assignRole = require("./assignRole");
 
 
-client.on("interaction", (interaction) => {
+client.on("interactionCreate", (interaction) => {
 
     if (!interaction.guild) {
 
@@ -60,10 +60,11 @@ client.on("interaction", (interaction) => {
     
     } else if (interaction.isButton()) {
 
+
         const [
             commandName,
             buttonName
-        ] = interaction.customID.split("_");
+        ] = interaction.customId.split("_");
 
         if (commands[commandName]?.buttons[buttonName]) {
 

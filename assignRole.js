@@ -14,7 +14,7 @@ module.exports = async function assignRole (interaction) {
     const [
         messageID,
         roleID
-    ] = interaction.customID.split("-");
+    ] = interaction.customId.split("-");
 
     const role = await interaction.guild.roles.fetch(roleID);
 
