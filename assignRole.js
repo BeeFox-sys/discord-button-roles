@@ -37,7 +37,7 @@ module.exports = async function assignRole (interaction) {
 
         // Toggle
 
-        if (member.roles.cache.has(role)) {
+        if (member.roles.cache.has(role.id)) {
 
             await member.roles.remove(role);
             interaction.deferUpdate();
@@ -46,7 +46,6 @@ module.exports = async function assignRole (interaction) {
 
             await member.roles.add(role);
             interaction.deferUpdate();
-
 
         }
 
