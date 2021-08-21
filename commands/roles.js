@@ -1,4 +1,5 @@
-const {MessageActionRow, CommandInteraction, MessageButton} = require("discord.js");
+// eslint-disable-next-line no-unused-vars
+const {MessageActionRow, CommandInteraction, MessageButton, BaseGuildEmojiManager} = require("discord.js");
 const {MessageRoles} = require("../schemas/roles");
 
 module.exports.commandData = {
@@ -31,7 +32,7 @@ module.exports.commandData = {
                 {
                     "name": "style",
                     "description": "The style of the button",
-                    "type": "STRING",
+                    "type": "INTEGER",
                     "choices": [
                         {
                             "name": "Blurple",
@@ -101,6 +102,10 @@ module.exports.command = function command (interaction) {
         interaction.reply({
             "epherical": true,
             "content": "You do not have permission"
+        }).catch((error) => {
+
+            console.error("Interaction timed out:", error.stack, error);
+        
         });
     
     }
@@ -133,6 +138,10 @@ async function add (interaction) {
         interaction.reply({
             "epherical": true,
             "content": "That message is not editable!"
+        }).catch((error) => {
+
+            console.error("Interaction timed out:", error.stack, error);
+        
         });
         
         return;
@@ -144,6 +153,10 @@ async function add (interaction) {
         interaction.reply({
             "epherical": true,
             "content": "You must have at least one of `emoji` and `label`"
+        }).catch((error) => {
+
+            console.error("Interaction timed out:", error.stack, error);
+        
         });
         
         return;
@@ -155,11 +168,17 @@ async function add (interaction) {
         interaction.reply({
             "epherical": true,
             "content": "`label` must be less then 80 characters"
+        }).catch((error) => {
+
+            console.error("Interaction timed out:", error.stack, error);
+        
         });
         
         return;
     
     }
+
+    BaseGuildEmojiManager.resolveEmoji();
 
     // eslint-disable-next-line require-unicode-regexp
     const emojiRegex = /(?:\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]|<a?:.+?:\d+>)/i;

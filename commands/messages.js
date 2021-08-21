@@ -94,6 +94,10 @@ module.exports.command = function command (interaction) {
         interaction.reply({
             "epherical": true,
             "content": "You do not have permission"
+        }).catch((error) => {
+
+            console.error("Interaction timed out:", error.stack, error);
+        
         });
         
         return;
@@ -131,47 +135,48 @@ async function create (interaction) {
             }
         ]);
 
-    interaction.reply("Creating Message...");
+    interaction.reply("Creating Message...").catch((error) => {
 
-    console.log(interaction.options.get("channel"));
+        console.error("Interaction timed out:", error.stack, error);
+    
+    });
+
     const message = await interaction.options.get("channel").channel.send({
         "content": interaction.options.get("content")?.value ?? "** **",
         "components": [rowOne]
+    }).catch((error) => {
+
+        console.error("Error creating message:", error);
+    
     });
 
-    console.log(interaction, message);
-
-    new MessageRoles({
+    await new MessageRoles({
         "guildID": message.guild.id,
         "channelID": message.channel.id,
         "messageID": message.id,
         "replace": false,
         "buttons": [],
         "mode": 0
-    }).save((err) => {
+    }).save();
 
-        // TODO: error handling
-        if (err) {
+    interaction.followUp({
+        "content": "Message Created!",
+        "components": [
+            {
+                "type": "ACTION_ROW",
+                "components": [
+                    {
+                        "type": 2,
+                        "label": "Jump!",
+                        "style": 5,
+                        "url": message.url
+                    }
+                ]
+            }
+        ]
+    }).catch((error) => {
 
-            return;
-
-        }
-        interaction.followUp({
-            "content": "Message Created!",
-            "components": [
-                {
-                    "type": "ACTION_ROW",
-                    "components": [
-                        {
-                            "type": 2,
-                            "label": "Jump!",
-                            "style": 5,
-                            "url": message.url
-                        }
-                    ]
-                }
-            ]
-        });
+        console.error("Interaction timed out:", error.stack, error);
     
     });
    
@@ -191,6 +196,10 @@ async function edit (interaction) {
         interaction.reply({
             "epherical": true,
             "content": "That message is not editable!"
+        }).catch((error) => {
+
+            console.error("Interaction timed out:", error.stack, error);
+        
         });
         
         return;
@@ -200,7 +209,12 @@ async function edit (interaction) {
     const channel = await interaction.guild.channels.fetch(messageEntry.channelID);
     const message = await channel.messages.fetch(messageEntry.messageID);
 
-    await message.edit(interaction.options.get("content").value);
+    await message.edit(interaction.options.get("content").value)
+        .catch((error) => {
+
+            console.error("Error editing message:", error);
+
+        });
 
     interaction.reply({
         "content": "Edited Message!",
@@ -217,6 +231,10 @@ async function edit (interaction) {
                 ]
             }
         ]
+    }).catch((error) => {
+
+        console.error("Interaction timed out:", error.stack, error);
+    
     });
 
 }
@@ -229,10 +247,18 @@ module.exports.buttons.addRoles = async function addRoles (interaction) {
     interaction.reply({
         "content": "To add roles to this message, simply use `/roles add [role] [emoji] [name] [messageID]. The message ID for this message is:",
         "ephemeral": true
+    }).catch((error) => {
+
+        console.error("Interaction timed out:", error.stack, error);
+    
     });
     interaction.followUp({
         "ephemeral": true,
         "content": interaction.message.id
+    }).catch((error) => {
+
+        console.error("Interaction timed out:", error.stack, error);
+    
     });
     
 };
@@ -259,6 +285,10 @@ async function mode (interaction) {
         interaction.reply({
             "epherical": true,
             "content": "That message is not editable!"
+        }).catch((error) => {
+
+            console.error("Interaction timed out:", error.stack, error);
+        
         });
         
         return;
@@ -272,6 +302,10 @@ async function mode (interaction) {
 
     interaction.reply({
         "content": `Role assignment mode set to: ${messageModeTypes[messageMode]}`
+    }).catch((error) => {
+
+        console.error("Interaction timed out:", error.stack, error);
+    
     });
 
 }

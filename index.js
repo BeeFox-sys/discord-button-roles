@@ -50,7 +50,11 @@ client.on("interactionCreate", (interaction) => {
 
     if (!interaction.guild) {
 
-        interaction.reply("No can do! I am a guild only bot!");
+        interaction.reply("No can do! I am a guild only bot!").catch((error) => {
+
+            console.error("Interaction timed out:", error.stack, error);
+        
+        });
     
     }
 
@@ -87,7 +91,7 @@ client.on("interactionCreate", (interaction) => {
 
 client.on("ready", () => {
 
-    console.log("bot connected  ");
+    console.log("bot connected");
 
 });
 

@@ -27,6 +27,10 @@ module.exports = async function assignRole (interaction) {
         interaction.followUp({
             "ephemeral": true,
             "content": "The role for this button has been deleted! Please contact a moderator!"
+        }).catch((error) => {
+
+            console.error("Interaction timed out:", error.stack, error);
+        
         });
     
     }
@@ -36,44 +40,73 @@ module.exports = async function assignRole (interaction) {
     if (messageEntry.mode === 0) {
 
         // Toggle
+        try {
 
-        if (member.roles.cache.has(role.id)) {
+            if (member.roles.cache.has(role.id)) {
 
-            await member.roles.remove(role);
-            interaction.deferUpdate();
+                await member.roles.remove(role);
+                interaction.deferUpdate();
+            
+            } else {
+
+                await member.roles.add(role);
+                interaction.deferUpdate();
+
+            }
         
-        } else {
+        } catch (error) {
 
-            await member.roles.add(role);
-            interaction.deferUpdate();
-
+            console.error("Error assiging toggle role:", error);
+        
         }
 
     } else if (messageEntry.mode === 1) {
 
         // Replace
+        try {
 
-        const allRoles = messageEntry.buttons.map((button) => button.roleID).filter((testedRole) => testedRole !== testedRole.id);
+            const allRoles = messageEntry.buttons.map((button) => button.roleID).filter((testedRole) => testedRole !== testedRole.id);
 
-        await member.roles.remove(allRoles);
-        await member.roles.add(role);
-        interaction.deferUpdate();
+            await member.roles.remove(allRoles);
+            await member.roles.add(role);
+            interaction.deferUpdate();
+        
+        } catch (error) {
 
+            console.error("Error assiging replacement role:", error);
+    
+        }
 
     } else if (messageEntry.mode === 2) {
 
         // Give
 
-        await member.roles.add(role);
-        interaction.deferUpdate();
+        try {
 
+            await member.roles.add(role);
+            interaction.deferUpdate();
+        
+        } catch (error) {
+
+            console.error("Error assiging role:", error);
+    
+        }
+    
     } else if (messageEntry.mode === 3) {
 
         // Remove
 
-        await member.roles.remove(role);
-        interaction.deferUpdate();
+        try {
 
+            await member.roles.remove(role);
+            interaction.deferUpdate();
+        
+        } catch (error) {
+
+            console.error("Error removing role:", error);
+    
+        }
+    
     }
 
 
