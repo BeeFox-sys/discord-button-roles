@@ -39,6 +39,6 @@ module.exports = async function deploy (client, guild = null) {
         setCommands = client.application?.commands.set(data);
     
     }
-    console.log(setCommands);
+    setCommands.then(console.log);
 
 };
