@@ -16,7 +16,10 @@ module.exports.command = function command (interaction) {
 
     interaction.reply({
         "content": interaction.client.generateInvite({
-            "scopes": ["bot"],
+            "scopes": [
+                "bot",
+                "applications.commands"
+            ],
             "permissions": [
                 FLAGS.MANAGE_ROLES,
                 FLAGS.USE_APPLICATION_COMMANDS,
