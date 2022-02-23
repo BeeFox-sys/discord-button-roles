@@ -156,12 +156,12 @@ module.exports.commandData = {
                     "name": "insert",
                     "description": "To insert before or after the first role",
                     "required": true,
-                    "type": "STRING",
+                    "type": "INTEGER",
                     "choices": [
                         {"name": "Before",
-                            "value": "true"},
+                            "value": 0},
                         {"name": "After",
-                            "value": "false"}
+                            "value": 1}
                     ]
                 },
                 {
@@ -204,6 +204,8 @@ module.exports.command = function command (interaction) {
     case "index": indexRoles(interaction);
         break;
     case "switch": switchRoles(interaction);
+        break;
+    case "insert": spliceRoles(interaction);
         break;
     default: break;
         
@@ -718,6 +720,91 @@ async function switchRoles (interaction) {
     });
 
     interaction.reply(`Swapped positions ${first_role} and ${second_role}`);
+
+
+}
+
+/**
+ *
+ * @param {CommandInteraction} interaction
+ */
+async function spliceRoles (interaction) {
+
+    const id = interaction.options.get("id").value;
+    let messageEntry = await MessageRoles.findOne({"messageID": id});
+
+    if (!messageEntry || messageEntry.guildID !== interaction.guild.id) {
+
+        interaction.reply({
+            "epherical": true,
+            "content": "That message is not editable!"
+        });
+    
+    }
+
+    const first_role = Math.min(interaction.options.get("first_role").value, messageEntry.buttons.length);
+    const second_role = Math.min(interaction.options.get("second_role").value, messageEntry.buttons.length);
+    const insert_before = interaction.options.get("insert").value;
+
+    const buttonArray = messageEntry.buttons.toObject();
+
+    const moving = buttonArray.splice(first_role, 1);
+    
+    buttonArray.splice(second_role - (second_role > 0 ? 1 : 0) + insert_before, 0, ...moving);
+
+    messageEntry.buttons = buttonArray;
+
+    messageEntry.markModified("buttons");
+
+    messageEntry = await messageEntry.save();
+
+    const components = [];
+        
+    let row = 0;
+
+    if (messageEntry.buttons.length > 0) {
+
+        components.push(new MessageActionRow());
+        
+    }
+
+    for (let index = 0; index < 25; index++) {
+            
+        const button = messageEntry.buttons.shift();
+
+        if (button) {
+
+            if (components[row].components.length === 5) {
+
+                components.push(new MessageActionRow());
+                row++;
+                
+            }
+
+            const {label, emoji, style, "buttonID": custom_id} = button;
+
+
+            components[row].addComponents({
+                label,
+                emoji,
+                style,
+                custom_id,
+                "type": 2
+            });
+            
+        }
+        
+    }
+
+    const channel = await interaction.guild.channels.fetch(messageEntry.channelID);
+    const message = await channel.messages.fetch(messageEntry.messageID);
+
+    await message.edit({
+        "content": message.content,
+        components
+    });
+
+    interaction.reply(`Moved ${first_role} ${insert_before === 0 ? "before" : "after"} ${second_role}`);
 
 
 }
