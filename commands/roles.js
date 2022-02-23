@@ -90,6 +90,89 @@ module.exports.commandData = {
                     "type": "STRING"
                 }
             ]
+        },
+        {
+            "name": "index",
+            "description": "Lists the index of each role, for use with the switch command",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "id",
+                    "description": "The id of the message you wish to edit",
+                    "required": true,
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "switch",
+            "description": "Switches two roles",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "id",
+                    "description": "The id of the message you wish to edit",
+                    "required": true,
+                    "type": "STRING"
+                },
+                {
+                    "name": "first_role",
+                    "description": "The index of the role you wish to switch with the second role",
+                    "required": true,
+                    "type": "INTEGER",
+                    "min": 0,
+                    "max": 25
+                },
+                {
+                    "name": "second_role",
+                    "description": "The index of the role you wish to switch with the first role",
+                    "required": true,
+                    "type": "INTEGER",
+                    "min": 0,
+                    "max": 25
+                }
+            ]
+        },
+        {
+            "name": "insert",
+            "description": "Moves a role before or after another role",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "id",
+                    "description": "The id of the message you wish to edit",
+                    "required": true,
+                    "type": "STRING"
+                },
+                {
+                    "name": "first_role",
+                    "description": "The index of the role you wish to move",
+                    "required": true,
+                    "type": "INTEGER",
+                    "min": 0,
+                    "max": 25
+                },
+                {
+                    "name": "insert",
+                    "description": "To insert before or after the first role",
+                    "required": true,
+                    "type": "STRING",
+                    "choices": [
+                        {"name": "Before",
+                            "value": "true"},
+                        {"name": "After",
+                            "value": "false"}
+                    ]
+                },
+                {
+                    "name": "second_role",
+                    "description": "The index of the role you wish to insert before/after",
+                    "required": true,
+                    "type": "INTEGER",
+                    "min": 0,
+                    "max": 25
+                }
+            ]
         }
     ]
 };
@@ -117,6 +200,10 @@ module.exports.command = function command (interaction) {
     case "remove": remove(interaction);
         break;
     case "cleanup": cleanup(interaction);
+        break;
+    case "index": indexRoles(interaction);
+        break;
+    case "switch": switchRoles(interaction);
         break;
     default: break;
         
@@ -508,5 +595,129 @@ async function cleanup (interaction) {
         ]
     });
     
+
+}
+
+/**
+ *  Returns the index of roles of a message
+ * @param {CommandInteraction} interaction
+ */
+async function indexRoles (interaction) {
+
+    const id = interaction.options.get("id").value;
+    const messageEntry = await MessageRoles.findOne({"messageID": id});
+
+    if (!messageEntry || messageEntry.guildID !== interaction.guild.id) {
+
+        interaction.reply({
+            "epherical": true,
+            "content": "That message is not editable!"
+        });
+    
+    }
+
+    const roles = [];
+
+    for (const buttonIndex in messageEntry.buttons) {
+
+        if (Object.hasOwnProperty.call(messageEntry.buttons, buttonIndex)) {
+
+            const buttonEntry = messageEntry.buttons[buttonIndex];
+            const role = await interaction.guild.roles.fetch(buttonEntry.roleID);
+
+            roles.push(role);
+        
+        }
+    
+    }
+
+    interaction.reply({
+        "content": roles.map((role, index) => `${index}: ${messageEntry.buttons[index].emoji ?? ""} ${messageEntry.buttons[index].label ?? ""} | ${role.toString()}`.replace(/\s+/ug, " "))
+            .join("\n")
+    });
+
+}
+
+/**
+ *
+ * @param {CommandInteraction} interaction
+ */
+async function switchRoles (interaction) {
+
+    const id = interaction.options.get("id").value;
+    const messageEntry = await MessageRoles.findOne({"messageID": id});
+
+    if (!messageEntry || messageEntry.guildID !== interaction.guild.id) {
+
+        interaction.reply({
+            "epherical": true,
+            "content": "That message is not editable!"
+        });
+    
+    }
+
+    const first_role = Math.min(interaction.options.get("first_role").value, messageEntry.buttons.length);
+    const second_role = Math.min(interaction.options.get("second_role").value, messageEntry.buttons.length);
+
+    [
+        messageEntry.buttons[first_role],
+        messageEntry.buttons[second_role]
+    ] = [
+        messageEntry.buttons[second_role],
+        messageEntry.buttons[first_role]
+    ];
+
+    messageEntry.markModified("buttons");
+
+    await messageEntry.save();
+
+    const components = [];
+        
+    let row = 0;
+
+    if (messageEntry.buttons.length > 0) {
+
+        components.push(new MessageActionRow());
+        
+    }
+
+    for (let index = 0; index < 25; index++) {
+            
+        const button = messageEntry.buttons.shift();
+
+        if (button) {
+
+            if (components[row].components.length === 5) {
+
+                components.push(new MessageActionRow());
+                row++;
+                
+            }
+
+            const {label, emoji, style, "buttonID": custom_id} = button;
+
+
+            components[row].addComponents({
+                label,
+                emoji,
+                style,
+                custom_id,
+                "type": 2
+            });
+            
+        }
+        
+    }
+
+    const channel = await interaction.guild.channels.fetch(messageEntry.channelID);
+    const message = await channel.messages.fetch(messageEntry.messageID);
+
+    await message.edit({
+        "content": message.content,
+        components
+    });
+
+    interaction.reply(`Swapped positions ${first_role} and ${second_role}`);
+
 
 }

@@ -15,7 +15,8 @@ module.exports.commandData = {
                     "name": "channel",
                     "description": "The channel in which to create the message",
                     "required": true,
-                    "type": "CHANNEL"
+                    "type": "CHANNEL",
+                    "channelTypes": ["GUILD_TEXT"]
                 },
                 {
                     "name": "content",
