@@ -26,7 +26,7 @@ module.exports = async function assignRole (interaction) {
 
         interaction.followUp({
             "ephemeral": true,
-            "content": "The role for this button has been deleted! Please contact a moderator!"
+            "content": "Thefor this button has been deleted! Please contact a moderator!"
         }).catch((error) => {
 
             console.error("Interaction timed out:", error.stack, error);
@@ -45,18 +45,29 @@ module.exports = async function assignRole (interaction) {
             if (member.roles.cache.has(role.id)) {
 
                 await member.roles.remove(role);
-                interaction.deferUpdate();
+                interaction.reply({
+                    "ephemeral": true,
+                    "content": `Removed ${role.toString()}`
+                });
             
             } else {
 
                 await member.roles.add(role);
-                interaction.deferUpdate();
+                interaction.reply({
+                    "ephemeral": true,
+                    "content": `Added ${role.toString()}`
+                });
+            
 
             }
         
         } catch (error) {
 
             console.error("Error assiging toggle role:", error);
+            interaction.reply({
+                "ephemeral": true,
+                "content": `Error: ${error.message}`
+            });
         
         }
 
@@ -69,12 +80,20 @@ module.exports = async function assignRole (interaction) {
 
             await member.roles.remove(allRoles);
             await member.roles.add(role);
-            interaction.deferUpdate();
+            interaction.reply({
+                "ephemeral": true,
+                "content": `Switched to ${role.toString()}`
+            });
+        
         
         } catch (error) {
 
             console.error("Error assiging replacement role:", error);
-    
+            interaction.reply({
+                "ephemeral": true,
+                "content": `Error: ${error.message}`
+            });
+        
         }
 
     } else if (messageEntry.mode === 2) {
@@ -84,11 +103,19 @@ module.exports = async function assignRole (interaction) {
         try {
 
             await member.roles.add(role);
-            interaction.deferUpdate();
+            interaction.reply({
+                "ephemeral": true,
+                "content": `Added ${role.toString()}`
+            });
+        
         
         } catch (error) {
 
             console.error("Error assiging role:", error);
+            interaction.reply({
+                "ephemeral": true,
+                "content": `Error: ${error.message}`
+            });
     
         }
     
@@ -99,12 +126,20 @@ module.exports = async function assignRole (interaction) {
         try {
 
             await member.roles.remove(role);
-            interaction.deferUpdate();
+            interaction.reply({
+                "ephemeral": true,
+                "content": `Removed ${role.toString()}`
+            });
+        
         
         } catch (error) {
 
             console.error("Error removing role:", error);
-    
+            interaction.reply({
+                "ephemeral": true,
+                "content": `Error: ${error.message}`
+            });
+        
         }
     
     }

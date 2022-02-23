@@ -19,7 +19,7 @@ module.exports.commandData = {
                 },
                 {
                     "name": "content",
-                    "description": "The content for the message",
+                    "description": "The content for the message, use \\n to add a new line",
                     "type": "STRING"
                 }
             ]
@@ -37,7 +37,7 @@ module.exports.commandData = {
                 },
                 {
                     "name": "content",
-                    "description": "The content for the message",
+                    "description": "The content for the message, use \\n to add a new line",
                     "type": "STRING",
                     "required": true
                 }
