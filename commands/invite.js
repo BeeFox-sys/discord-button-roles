@@ -15,7 +15,7 @@ module.exports.commandData = {
 module.exports.command = function command (interaction) {
 
     interaction.reply({
-        "content": interaction.client.generateInvite({
+        "content": `You can invite role bearer with this link: ${interaction.client.generateInvite({
             "scopes": [
                 "bot",
                 "applications.commands"
@@ -27,8 +27,8 @@ module.exports.command = function command (interaction) {
                 FLAGS.VIEW_CHANNEL,
                 FLAGS.READ_MESSAGE_HISTORY
             ]
-        }),
-        "ephemeral": true
+        })}\nIf you want to support rolebearer's server costs, you can donate to Beefox at https://liberapay.com/beefox/ (An open source donation service)`,
+        "ephemeral": false
     });
 
 };
