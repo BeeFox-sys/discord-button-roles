@@ -71,10 +71,12 @@ module.exports.commandData = {
                     "type": "STRING"
                 },
                 {
-                    "name": "role",
-                    "description": "The role of the button you would like to remove",
-                    "type": "ROLE",
-                    "required": true
+                    "name": "index",
+                    "description": "The index of the role of the button you would like to remove",
+                    "type": "INTEGER",
+                    "required": true,
+                    "min": 0,
+                    "max": 25
                 }
             ]
         },
@@ -405,21 +407,21 @@ async function remove (interaction) {
     
     }
 
-    if (!messageEntry.buttons.filter((elem) => elem.roleID === interaction.options.get("role").value).length) {
+    const roleIndex = interaction.options.get("index").value;
+
+    if (roleIndex > messageEntry.buttons.length) {
 
         interaction.reply({
             "epherical": true,
-            "content": "That Role isn't in the list!"
+            "content": `There are only ${messageEntry.buttons.length} roles!\nThe first role is index 0, you can see the indexs with /roles index`
         });
         
         return;
     
     }
     
-    
-    const buttonIndex = messageEntry.buttons.indexOf((elem) => elem.roleID === interaction.options.get("role").value);
-
-    messageEntry.buttons.splice(buttonIndex, 1);
+    messageEntry.buttons.splice(roleIndex, 1);
+    messageEntry.markModified("buttons");
 
     messageEntry.save().then(async (newEntry) => {
 
