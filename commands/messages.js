@@ -143,7 +143,7 @@ async function create (interaction) {
     });
 
     const message = await interaction.options.get("channel").channel.send({
-        "content": interaction.options.get("content")?.value.replace("\\n", "\n") ?? "** **",
+        "content": interaction.options.get("content")?.value.replaceAll("\\n", "\n") ?? "** **",
         "components": [rowOne]
     }).catch((error) => {
 
@@ -210,7 +210,7 @@ async function edit (interaction) {
     const channel = await interaction.guild.channels.fetch(messageEntry.channelID);
     const message = await channel.messages.fetch(messageEntry.messageID);
 
-    await message.edit(interaction.options.get("content").value.replace("\\n", "\n"))
+    await message.edit(interaction.options.get("content").value.replaceAll("\\n", "\n"))
         .catch((error) => {
 
             console.error("Error editing message:", error);
